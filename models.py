@@ -83,6 +83,14 @@ class Address(Field):
     """Required non-empty address value."""
     # TODO: Trim whitespace and reject an empty value.
 
+    def __init__(self, value: str):
+        normalized_value = value.strip()
+
+        if not normalized_value:
+            raise ValueError("Адреса не може бути порожньою.")
+        
+        super().__init__(normalized_value)
+
 
 class Birthday(Field):
     """Birthday parsed from DD.MM.YYYY and stored as a date."""
