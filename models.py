@@ -27,9 +27,36 @@ class Name(Field):
 
 class Phone(Field):
     """Normalized and validated phone number."""
-
     # TODO: Remove spaces, brackets and hyphens; validate the agreed phone
     # format (10 digits or an international number such as +380...).
+
+    def __init__(self, value: str):
+        normalized_value = (
+            value.strip()
+            .replace(" ", "")
+            .replace("-", "")
+            .replace("(", "")
+            .replace(")", "")
+        )
+
+        local_phone_is_valid = (
+            len(normalized_value) == 10
+            and normalized_value.isdigit()
+        )
+
+        international_phone_is_valid = (
+            normalized_value.startswith("+")
+            and normalized_value[1:].isdigit()
+            and 10 <= len(normalized_value[1:]) <= 15
+        )
+
+        if not local_phone_is_valid and not international_phone_is_valid:
+            raise ValueError(
+                "Некоректний номер телефону. Введіть 10 цифр "
+                "або міжнародний номер у форматі + та від 10 до 15 цифр."
+            )
+
+        super().__init__(normalized_value)
 
 
 class Email(Field):
@@ -40,7 +67,6 @@ class Email(Field):
 
 class Address(Field):
     """Required non-empty address value."""
-
     # TODO: Trim whitespace and reject an empty value.
 
 
