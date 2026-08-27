@@ -1,3 +1,5 @@
+import re
+
 """Validated domain models for contacts and standalone notes."""
 
 
@@ -61,8 +63,20 @@ class Phone(Field):
 
 class Email(Field):
     """Normalized, lower-case email address."""
-
     # TODO: Trim/lowercase and validate a basic name@domain.tld structure.
+
+    def __init__(self, value: str):
+        normalized_value = value.strip().lower()
+
+        email_pattern = r"^[^\s@]+@[^\s@]+\.[^\s@]+$"
+
+        if not re.fullmatch(email_pattern, normalized_value):
+            raise ValueError(
+                "Некоректна електронна адреса. "
+                "Використовуйте формат name@domain.tld."
+            )
+
+        super().__init__(normalized_value)
 
 
 class Address(Field):
