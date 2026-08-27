@@ -1,21 +1,22 @@
 import uuid
+from models import Note
 
 
 def add_note(notes):
     """Creates a note with a unique UUID and text from user input."""
     while True:
         text = input("Note text: ").strip()
-        if text:
-            break
-        print("Note text cannot be empty. Please try again.")
-
-    note_id = str(uuid.uuid4())
-    # Assuming Note accepts (id, text); import Note from your project's models module
-    from models import Note
-
-    note = Note(note_id, text)
-    notes.add(note)
-    return f"Note added: {note}"
+        if not text:
+            print("Note text cannot be empty. Please try again.")
+            continue
+            
+        try:
+            note_id = str(uuid.uuid4())
+            note = Note(note_id, text)
+            notes.add(note)
+            return f"Note added: {note}"
+        except (ValueError, KeyError) as e:
+            print(f"Error: {e}. Please try again.")
 
 
 def find_note(args, notes):
@@ -45,11 +46,16 @@ def change_note(args, notes):
 
     while True:
         new_text = input("New note text: ").strip()
-        if new_text:
+        if not new_text:
+            print("Note text cannot be empty. Please try again.")
+            continue
+            
+        try:
+            note.edit_text(new_text)
             break
-        print("Note text cannot be empty. Please try again.")
+        except ValueError as e:
+            print(f"Error: {e}. Please try again.")
 
-    note.edit_text(new_text)
     return f"Note updated: {note}"
 
 
@@ -68,15 +74,18 @@ def delete_note(args, notes):
     confirm = input("Are you sure? (yes/no): ").strip().lower()
 
     if confirm == "yes":
-        notes.delete(note_id)
-        return "Note deleted."
+        try:
+            notes.delete(note_id)
+            return "Note deleted."
+        except (ValueError, KeyError) as e:
+            return str(e)
 
     return "Deletion cancelled."
 
 
 def add_tag(args, notes):
     """Adds a tag to a note (add-tag <note_id> <tag>)."""
-    if len(args) < 2:
+    if len(args) != 2:
         return "Usage: add-tag <note_id> <tag>"
 
     note_id, tag = args[0], args[1]
@@ -112,7 +121,7 @@ def edit_tag(args, notes):
 
 def delete_tag(args, notes):
     """Deletes a tag from a note after confirmation (delete-tag <note_id> <tag>)."""
-    if len(args) < 2:
+    if len(args) != 2:
         return "Usage: delete-tag <note_id> <tag>"
 
     note_id, tag = args[0], args[1]
