@@ -14,8 +14,15 @@ class Field:
 
 class Name(Field):
     """Required contact name; trim whitespace and reject an empty value."""
-
     # TODO: Validate while retaining Unicode names (including Ukrainian names).
+
+    def __init__(self, value: str):
+        normalized_value = value.strip()
+
+        if not normalized_value:
+            raise ValueError("Ім’я контакту не може бути порожнім.")
+
+        super().__init__(normalized_value)
 
 
 class Phone(Field):
