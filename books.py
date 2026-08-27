@@ -1,198 +1,156 @@
 """Repositories for contacts and standalone notes, both keyed by stable ids."""
- 
+
 from collections import UserDict
- 
+
 from upcoming_birthdays import get_upcoming_birthdays
- 
- 
-MAX_UPCOMING_DAYS = 365
- 
- 
-def _text(value) -> str:
+
+
+def _as_text(value) -> str:
     """Return a plain string for a field object, a raw value or ``None``."""
     if value is None:
         return ""
-    inner = getattr(value, "value", value)
-    if inner is None:
-        return ""
-    return str(inner)
- 
- 
-def _normalize(value) -> str:
-    """Case-insensitive, whitespace-collapsed form used for lookups."""
-    return " ".join(_text(value).split()).casefold()
- 
- 
-def _iter_values(value):
-    """Yield every element of a collection field, or the field itself."""
-    if value is None:
-        return
-    if isinstance(value, (str, bytes)) or not hasattr(value, "__iter__"):
-        yield value
-        return
-    yield from value
- 
- 
-def _digits(value: str) -> str:
-    return "".join(char for char in value if char.isdigit())
- 
- 
+    return str(getattr(value, "value", value) or "")
+
+
+def _normalize_tag(tag) -> str:
+    """Normalize a tag the same way ``Note`` does: no '#', lower-case, trimmed."""
+    return _as_text(tag).strip().lstrip("#").strip().lower()
+
+
 class AddressBook(UserDict):
     """Store ``Contact`` objects as ``{contact_id: contact}``."""
- 
+
     def add(self, contact):
-        """Reject a duplicate normalized contact name, then store contact."""
-        name = _normalize(getattr(contact, "name", None))
-        if not name:
-            raise ValueError("Contact name cannot be empty.")
- 
-        for existing in self.data.values():
-            if _normalize(getattr(existing, "name", None)) == name:
-                raise ValueError(
-                    f"Contact '{_text(getattr(contact, 'name', None))}' already exists."
-                )
- 
-        contact_id = _text(getattr(contact, "id", None))
-        if not contact_id:
-            raise ValueError("Contact must have an id.")
+        """Store contact under its id.
+
+        Ids are unique; names are not — two contacts may both be named
+        "Олександр" as long as their UUIDs differ.
+        """
+        contact_id = _as_text(contact.id)
         if contact_id in self.data:
             raise ValueError(f"Contact with id '{contact_id}' already exists.")
- 
+
         self.data[contact_id] = contact
         return contact
- 
+
     def find_by_id(self, contact_id: str):
         """Return a Contact by id, or None."""
-        return self.data.get(_text(contact_id))
- 
+        return self.data.get(contact_id)
+
     def search(self, query: str):
         """Return every partial, case-insensitive match across name,
         phone, email, address and birthday."""
-        needle = _normalize(query)
+        needle = _as_text(query).strip().lower()
         if not needle:
-            raise ValueError("Search query cannot be empty.")
- 
-        digits = _digits(needle)
-        matches = []
- 
-        for contact in self.data.values():
-            haystack = self._searchable_parts(contact)
-            if any(needle in part for part in haystack):
-                matches.append(contact)
-                continue
-            if digits and any(digits in _digits(part) for part in haystack):
-                matches.append(contact)
- 
-        return matches
- 
+            return []
+
+        return [
+            contact
+            for contact in self.data.values()
+            if needle in self._haystack(contact)
+        ]
+
     @staticmethod
-    def _searchable_parts(contact):
-        """Flatten every searchable field of a contact into normalized strings."""
-        fields = ("name", "phones", "phone", "emails", "email", "address", "birthday")
-        parts = []
-        for field in fields:
-            for value in _iter_values(getattr(contact, field, None)):
-                normalized = _normalize(value)
-                if normalized:
-                    parts.append(normalized)
-        return parts
- 
+    def _haystack(contact) -> str:
+        """Flatten a contact into one lower-case string used for searching."""
+        parts = [_as_text(contact.id), _as_text(getattr(contact, "name", None))]
+
+        phones = getattr(contact, "phones", None)
+        if phones is None:
+            phones = getattr(contact, "phone", None)
+        if phones is None:
+            phones = []
+        elif isinstance(phones, str) or not hasattr(phones, "__iter__"):
+            phones = [phones]
+        parts.extend(_as_text(phone) for phone in phones)
+
+        parts.append(_as_text(getattr(contact, "email", None)))
+        parts.append(_as_text(getattr(contact, "address", None)))
+        parts.append(_as_text(getattr(contact, "birthday", None)))
+
+        return " ".join(part for part in parts if part).lower()
+
     def delete(self, contact_id: str):
         """Delete a Contact by id or report it missing. Confirmation is
         performed by the user-facing command before this method is called."""
-        key = _text(contact_id)
-        if key not in self.data:
-            raise KeyError(f"Contact with id '{key}' was not found.")
-        return self.data.pop(key)
- 
+        if contact_id not in self.data:
+            raise KeyError(f"Contact with id '{contact_id}' was not found.")
+
+        del self.data[contact_id]
+
     def get_upcoming_birthdays(self, days: int):
         """Validate days and delegate the calculation to the helper."""
         if isinstance(days, bool) or not isinstance(days, int):
-            try:
-                days = int(str(days).strip())
-            except (TypeError, ValueError) as error:
-                raise ValueError("Number of days must be an integer.") from error
- 
-        if days < 1 or days > MAX_UPCOMING_DAYS:
-            raise ValueError(
-                f"Number of days must be between 1 and {MAX_UPCOMING_DAYS}."
-            )
- 
-        return get_upcoming_birthdays(list(self.data.values()), days)
- 
- 
+            raise ValueError("Number of days must be an integer.")
+        if days < 0:
+            raise ValueError("Number of days must not be negative.")
+
+        return get_upcoming_birthdays(self, days)
+
+
 class NotesBook(UserDict):
     """Store standalone ``Note`` objects as ``{note_id: note}``."""
- 
+
     def add(self, note):
         """Reject a duplicate id and store note."""
-        note_id = _text(getattr(note, "id", None))
-        if not note_id:
-            raise ValueError("Note must have an id.")
+        note_id = _as_text(note.id)
         if note_id in self.data:
             raise ValueError(f"Note with id '{note_id}' already exists.")
- 
+
         self.data[note_id] = note
         return note
- 
+
     def find_by_id(self, note_id: str):
         """Return a Note by id, or None."""
-        return self.data.get(_text(note_id))
- 
+        return self.data.get(note_id)
+
     def search(self, query: str):
         """Return every note whose text partially matches query."""
-        needle = _normalize(query)
+        needle = _as_text(query).strip().lower()
         if not needle:
-            raise ValueError("Search query cannot be empty.")
- 
+            return []
+
         return [
             note
             for note in self.data.values()
-            if needle in _normalize(getattr(note, "text", None))
+            if needle in _as_text(note.text).lower()
         ]
- 
+
     def search_by_tag(self, tag: str):
         """Normalize tag and return every note that contains it."""
-        needle = _normalize(tag).lstrip("#")
+        needle = _normalize_tag(tag)
         if not needle:
-            raise ValueError("Tag cannot be empty.")
- 
+            return []
+
         return [
             note
             for note in self.data.values()
             if needle in self._tags(note)
         ]
- 
+
     def sort_by_tags(self):
         """Return all notes ordered by tags, with untagged notes last;
         use text or id as a deterministic tie-breaker."""
- 
         def sort_key(note):
-            tags = sorted(self._tags(note))
-            return (
-                not tags,
-                tags,
-                _normalize(getattr(note, "text", None)),
-                _text(getattr(note, "id", None)),
-            )
- 
+            tags = self._tags(note)
+            first_tag = min(tags) if tags else ""
+            return (not tags, first_tag, _as_text(note.id))
+
         return sorted(self.data.values(), key=sort_key)
- 
+
     @staticmethod
-    def _tags(note):
+    def _tags(note) -> set:
         """Return the normalized, de-duplicated tags of a note."""
-        tags = set()
-        for value in _iter_values(getattr(note, "tags", None)):
-            normalized = _normalize(value).lstrip("#")
-            if normalized:
-                tags.add(normalized)
-        return tags
- 
+        raw = getattr(note, "tags", None) or []
+        if isinstance(raw, str):
+            raw = [raw]
+
+        return {tag for tag in (_normalize_tag(item) for item in raw) if tag}
+
     def delete(self, note_id: str):
         """Delete a Note by id or report it missing. Confirmation is
         performed by the user-facing command before this method is called."""
-        key = _text(note_id)
-        if key not in self.data:
-            raise KeyError(f"Note with id '{key}' was not found.")
-        return self.data.pop(key)
-    # Sasha, to please, I have completed the code in the middle of your provided snippet. If you need further assistance or modifications, feel free to ask!
+        if note_id not in self.data:
+            raise KeyError(f"Note with id '{note_id}' was not found.")
+
+        del self.data[note_id]
