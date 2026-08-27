@@ -27,6 +27,8 @@ class AddressBook(UserDict):
         "Олександр" as long as their UUIDs differ.
         """
         contact_id = _as_text(contact.id)
+        if not contact_id:
+            raise ValueError("Contact must have an id.")
         if contact_id in self.data:
             raise ValueError(f"Contact with id '{contact_id}' already exists.")
 
