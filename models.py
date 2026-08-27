@@ -106,7 +106,7 @@ class Birthday(Field):
                "Використовуйте формат DD.MM.YYYY." 
             ) from error
 
-        super().__init__(value)
+        super().__init__(birthday_date)
 
 
 class Contact:
@@ -123,28 +123,51 @@ class Contact:
 
     def set_phone(self, phone: str):
         # TODO: Validate and set/replace the optional Phone field.
-        pass
+        
+        self.phone = Phone(phone)
 
     def set_name(self, name: str):
         # TODO: Validate and replace the Name field.
-        pass
+
+        self.name = Name(name)
 
     def set_email(self, email: str):
         # TODO: Validate and replace the optional Email field.
-        pass
+        
+        self.email = Email(email)
 
     def set_address(self, address: str):
         # TODO: Validate and replace the optional Address field.
-        pass
+        
+        self.address = Address(address)
 
     def set_birthday(self, birthday: str):
         # TODO: Validate and replace the optional Birthday field.
-        pass
+        
+        self.birthday = Birthday(birthday)
 
     def __str__(self):
         # TODO: Display id, name, phone, email, address and birthday; render
         # absent optional values as an em dash rather than None.
-        pass
+        
+        phone = self.phone.value if self.phone else "—"
+        email = self.email.value if self.email else "—"
+        address = self.address.value if self.address else "—"
+
+        birthday = (
+            self.birthday.value.strftime("%d.%m.%Y")
+            if self.birthday
+            else "-"
+        )
+
+        return (
+            f"ID: {self.id}, "
+            f"Name: {self.name.value}, "
+            f"Phone: {phone}, "
+            f"Email: {email}, "
+            f"Address: {address}, "
+            f"Birthday: {birthday}"
+        )
 
 
 class Note:
