@@ -195,3 +195,4 @@ class NotesBook(UserDict):
         if key not in self.data:
             raise KeyError(f"Note with id '{key}' was not found.")
         return self.data.pop(key)
+    # Sasha, to please, I have completed the code in the middle of your provided snippet. If you need further assistance or modifications, feel free to ask!
