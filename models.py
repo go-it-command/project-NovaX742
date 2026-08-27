@@ -1,4 +1,5 @@
 import re
+from datetime import datetime
 
 """Validated domain models for contacts and standalone notes."""
 
@@ -94,8 +95,18 @@ class Address(Field):
 
 class Birthday(Field):
     """Birthday parsed from DD.MM.YYYY and stored as a date."""
-
     # TODO: Parse the date and report invalid calendar dates clearly.
+
+    def __init__(self, value: str):
+        try:
+            birthday_date = datetime.strptime(value.strip(),"%d.%m.%Y",).date()
+        except(ValueError, AttributeError) as error:
+            raise ValueError(
+               "Некоректна дата народження. "
+               "Використовуйте формат DD.MM.YYYY." 
+            ) from error
+
+        super().__init__(value)
 
 
 class Contact:
