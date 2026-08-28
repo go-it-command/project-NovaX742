@@ -20,29 +20,17 @@ from contact_commands import (
     delete_contact,
     find_contact,
 )
-
-# Функції нотаток - у note_commands.py.
-# (Задача 4 — команди нотаток і тегів)
-try:
-    from note_commands import (
-        add_note,
-        add_tag,
-        change_note,
-        delete_note,
-        delete_tag,
-        edit_tag,
-        find_note,
-        show_notes_by_tag,
-        sort_notes_by_tags,
-    )
-except ImportError:
-    # Тимчасові заглушки - до готовності note_commands.py.
-    def _not_implemented(*args, **kwargs):
-        return "Note commands are not implemented yet."
-
-    add_note = add_tag = change_note = delete_note = delete_tag = _not_implemented
-    edit_tag = find_note = show_notes_by_tag = sort_notes_by_tags = _not_implemented
-
+from note_commands import (
+    add_note,
+    add_tag,
+    change_note,
+    delete_note,
+    delete_tag,
+    edit_tag,
+    find_note,
+    show_notes_by_tag,
+    sort_notes_by_tags,
+)
 from command_suggester import suggest_command
 from storage import load_data, save_data
     
@@ -90,15 +78,30 @@ Available commands:
     exit / close
     """)
 
+
+def greeting():
+    return "How can I help you?"
+
     
 def main():
     """Run the direct command loop until the user enters ``exit`` or ``close``."""
     contacts, notes = load_data()
     # print("Welcome to the assistant bot!")
+    print("Welcome to the assistant bot!")
     print_menu()
+    print(greeting())
 
     while True:
-        user_input = input("Enter a command: ").strip()
+        # user_input = input("Enter a command: ").strip()
+
+        try:
+            user_input = input("Enter a command: ").strip()
+        except (EOFError, KeyboardInterrupt):
+            # Зберігаємо дані навіть при Ctrl+C.
+            print("\nGood bye!")
+            save_data(contacts, notes)
+            break
+
         if not user_input:
             continue
 
@@ -110,9 +113,12 @@ def main():
 
         match command:
             case "close" | "exit":
+                # Зберігаємо обидві книги перед завершенням програми.
                 save_data(contacts, notes)
                 print("Good bye!")
                 break
+
+            # Команди контактів.
             case "add-contact":
                 print(add_contact(contacts))
             case "change-contact":
@@ -124,6 +130,7 @@ def main():
             case "birthdays":
                 print(birthdays(args, contacts))
 
+            # Основні команди нотаток.
             case "add-note":
                 print(add_note(notes))
             case "find-note":
