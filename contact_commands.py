@@ -84,13 +84,11 @@ def _ask_optional_field(request, setter):
 def add_contact(contacts):
     while True:
         name = input("Name: ").strip()
-        if name:
+        try:
+            contact = Contact(str(uuid.uuid4()), name)
             break
-        # Повторюємо запит, оскільки ім'я є обов'язковим.
-        name = input("Name cannot be empty. Please enter a name.\nName: ").strip()
-
-    contact_id = str(uuid.uuid4())
-    contact = Contact(contact_id, name)
+        except ValueError as error:
+            print(f"Error: {error}")
 
     _ask_optional_field("Phone: ", contact.set_phone)
     _ask_optional_field("Email: ", contact.set_email)

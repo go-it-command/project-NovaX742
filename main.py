@@ -43,22 +43,8 @@ except ImportError:
     add_note = add_tag = change_note = delete_note = delete_tag = _not_implemented
     edit_tag = find_note = show_notes_by_tag = sort_notes_by_tags = _not_implemented
 
+from command_suggester import suggest_command
 from storage import load_data, save_data
-
-
-# після готовності іншого модуля - імпортувати реальні greeting/suggest_command.
-# Задача 1 — моделі, валідація й автопідказка
-# (command_suggester.py)
-# Задача 2 — книги й дні народження
-# (upcoming_birthdays.py)
-try:
-    from commands import greeting, suggest_command
-except ImportError:
-    def greeting():
-        return "How can I help you?"
-
-    def suggest_command(command):
-        return None
     
 
 def parse_input(user_input: str):
@@ -110,7 +96,6 @@ def main():
     contacts, notes = load_data()
     # print("Welcome to the assistant bot!")
     print_menu()
-    print(greeting())
 
     while True:
         user_input = input("Enter a command: ").strip()
