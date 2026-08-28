@@ -16,5 +16,5 @@ def load_data() -> tuple[AddressBook, NotesBook]:
     try:
         with DATA_FILE.open("rb") as file:
             return pickle.load(file)
-    except FileNotFoundError:
+    except (FileNotFoundError, EOFError, pickle.UnpicklingError, AttributeError):
         return AddressBook(), NotesBook()

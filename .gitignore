@@ -1,3 +1,7 @@
 __pycache__/
 *.py[cod]
 assistant_data.pkl
+.DS_Store
+plan/
+опис.md
+tech_критерії.md

@@ -27,6 +27,12 @@ def suggest_command(text: str):
     if not normalized_text:
         return None
 
+    prefix_matches = [
+        command for command in COMMANDS if command.startswith(normalized_text)
+    ]
+    if prefix_matches:
+        return min(prefix_matches, key=len)
+
     matches = get_close_matches(
         normalized_text,
         COMMANDS,
