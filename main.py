@@ -1,15 +1,4 @@
 """CLI entry point for the personal assistant."""
-"""
-1. Імпортувати контактні функції з `contact_commands.py`.
-2. Імпортувати нотаткові функції з `note_commands.py`.
-3. Замінити `split()` у `parse_input` на `shlex.split()`; якщо криві лапки,
-   показати помилку і продовжити цикл.
-4. У наявному `match` залишити всі основні й тегові команди.
-5. У `case _` викликати `suggest_command(command)`; якщо є результат, надрукувати
-   `Unknown command. Did you mean: <command>?`, інакше `Invalid command.`.
-6. Лишити `load_data()` до циклу та `save_data()` в `exit|close`.
-7. Меню друкувати один раз на старті.
-"""
 
 import shlex
 
@@ -33,7 +22,6 @@ from note_commands import (
 )
 from command_suggester import suggest_command
 from storage import load_data, save_data
-    
 
 def parse_input(user_input: str):
     """Return a lower-case command and whitespace-separated arguments.
@@ -44,7 +32,6 @@ def parse_input(user_input: str):
     try:
         parts = shlex.split(user_input)
     except ValueError:
-        # Наприклад, незакриті лапки не повинні завершувати CLI.
         return None, []
 
     if not parts:
@@ -80,24 +67,21 @@ Available commands:
 
 
 def greeting():
+    """Return a short greeting shown at application startup."""
     return "How can I help you?"
 
-    
+
 def main():
     """Run the direct command loop until the user enters ``exit`` or ``close``."""
     contacts, notes = load_data()
-    # print("Welcome to the assistant bot!")
     print("Welcome to the assistant bot!")
     print_menu()
     print(greeting())
 
     while True:
-        # user_input = input("Enter a command: ").strip()
-
         try:
             user_input = input("Enter a command: ").strip()
         except (EOFError, KeyboardInterrupt):
-            # Зберігаємо дані навіть при Ctrl+C.
             print("\nGood bye!")
             save_data(contacts, notes)
             break
@@ -113,12 +97,10 @@ def main():
 
         match command:
             case "close" | "exit":
-                # Зберігаємо обидві книги перед завершенням програми.
                 save_data(contacts, notes)
                 print("Good bye!")
                 break
 
-            # Команди контактів.
             case "add-contact":
                 print(add_contact(contacts))
             case "change-contact":
@@ -130,7 +112,6 @@ def main():
             case "birthdays":
                 print(birthdays(args, contacts))
 
-            # Основні команди нотаток.
             case "add-note":
                 print(add_note(notes))
             case "find-note":
@@ -140,7 +121,6 @@ def main():
             case "delete-note":
                 print(delete_note(args, notes))
 
-            # Optional commands.
             case "add-tag":
                 print(add_tag(args, notes))
             case "edit-tag":
@@ -153,7 +133,6 @@ def main():
                 print(sort_notes_by_tags(notes))
 
             case _:
-                # print("Invalid command.")
                 suggestion = suggest_command(command)
                 if suggestion:
                     print(f"Unknown command. Did you mean: {suggestion}?")

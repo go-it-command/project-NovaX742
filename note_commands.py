@@ -9,7 +9,7 @@ def add_note(notes):
         if not text:
             print("Note text cannot be empty. Please try again.")
             continue
-            
+
         try:
             note_id = str(uuid.uuid4())
             note = Note(note_id, text)
@@ -49,7 +49,7 @@ def change_note(args, notes):
         if not new_text:
             print("Note text cannot be empty. Please try again.")
             continue
-            
+
         try:
             note.edit_text(new_text)
             break
