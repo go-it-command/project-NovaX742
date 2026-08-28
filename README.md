@@ -7,7 +7,10 @@
 
 Потрібен Python 3.10 або новіший. Сторонніх залежностей немає.
 
+### Швидкий запуск у терміналі
+
 ```bash
+cd /Users/PC/Desktop/project-NovaX742
 python3 main.py
 ```
 
@@ -22,6 +25,25 @@ python3 main.py
 
 Не відкривайте сторонні `.pkl`-файли: `pickle` можна використовувати лише для
 даних, яким ви довіряєте.
+
+### Приклад роботи в застосунку
+
+Після запуску введіть команду, а потім значення, які програма запитує:
+
+```text
+Enter a command: add-contact
+Name: Ivan Petrenko
+Phone: 050-123-45-67
+Email: ivan@example.com
+Address: Kyiv, Khreshchatyk 1
+Birthday: 28.08.1995
+
+Enter a command: find-contact Ivan
+Enter a command: exit
+```
+
+Після `exit` дані зберігаються. Наступний запуск виконується тією самою
+командою `python3 main.py`.
 
 ## Команди контактів
 
