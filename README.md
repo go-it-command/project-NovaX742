@@ -45,6 +45,55 @@ Enter a command: exit
 Після `exit` дані зберігаються. Наступний запуск виконується тією самою
 командою `python3 main.py`.
 
+### Повний сценарій перевірки
+
+Під час створення контакту й нотатки програма надрукує їхній UUID. Скопіюйте
+UUID нотатки замість `<UUID_НОТАТКИ>` у командах нижче.
+
+```text
+# Контакти
+Enter a command: add-contact
+Name: Ivan Petrenko
+Phone: 050-123-45-67
+Email: ivan@example.com
+Address: Kyiv, Khreshchatyk 1
+Birthday: 28.08.1995
+
+Enter a command: find-contact Ivan
+Enter a command: change-contact Ivan
+Field (name/phone/email/address/birthday): phone
+New phone: 050-111-22-33
+Enter a command: birthdays 365
+
+# Нотатки
+Enter a command: add-note
+Note text: Buy milk after work
+Enter a command: find-note milk
+Enter a command: change-note <UUID_НОТАТКИ>
+New note text: Buy milk and bread
+
+# Теги
+Enter a command: add-tag <UUID_НОТАТКИ> shopping
+Enter a command: edit-tag <UUID_НОТАТКИ> shopping home
+Enter a command: show-notes-by-tag home
+Enter a command: sort-notes-by-tags
+Enter a command: delete-tag <UUID_НОТАТКИ> home
+Are you sure? (yes/no): yes
+
+# Видалення нотатки і контакту
+Enter a command: delete-note <UUID_НОТАТКИ>
+Are you sure? (yes/no): yes
+Enter a command: delete-contact Ivan
+Are you sure? (yes/no): no
+
+# Підказка та вихід
+Enter a command: find-co
+Unknown command. Did you mean: find-contact?
+Enter a command: exit
+```
+
+В усіх `delete-*` командах `no` скасовує операцію, а `yes` підтверджує її.
+
 ## Команди контактів
 
 | Команда | Що робить |
