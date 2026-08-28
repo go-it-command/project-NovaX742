@@ -17,8 +17,8 @@ from models import Contact
 8. Повернути `Contact added: <contact>`.
 """
 # приватна ф-ція модуля
+# Повертає один конкретний контакт або None.
 def _select_contact(args, contacts):
-    # Повертає один конкретний контакт або None.
     if not args:
         return None
 
@@ -54,8 +54,8 @@ def _select_contact(args, contacts):
 
 
 # приватна ф-ція модуля
+# Запитує необов'язкове поле та повторює ввід після ValueError.
 def _ask_optional_field(request, setter):
-    # Запитує необов'язкове поле та повторює ввід після ValueError.
     while True:
         value = input(request).strip()
         if not value:
@@ -80,8 +80,8 @@ def _ask_optional_field(request, setter):
 7. Викликати `contacts.add(contact)`.
 8. Повернути `Contact added: <contact>`.
 """
+# Інтерактивно створює новий контакт.
 def add_contact(contacts):
-    # Інтерактивно створює новий контакт.
     while True:
         name = input("Name: ").strip()
         if name:
@@ -113,8 +113,8 @@ def add_contact(contacts):
 5. Викликати відповідний `contact.set_*`.
 6. Повернути оновлений контакт.
 """
+# Знаходить контакт і змінює одне з його полів.
 def change_contact(args, contacts):
-    # Знаходить контакт і змінює одне з його полів.
     contact = _select_contact(args, contacts)
     if contact is None:
         return "Contact not found."
@@ -148,8 +148,8 @@ def change_contact(args, contacts):
 - інакше `contacts.search(' '.join(args))`;
 - повернути всі знайдені контакти або `No contacts found.`.
 """
+# Шукає контакти за довільним текстовим запитом.
 def find_contact(args, contacts):
-    # Шукає контакти за довільним текстовим запитом.
     if not args:
         return "Usage: find-contact <query>"
 
@@ -167,8 +167,8 @@ def find_contact(args, contacts):
 4. Тільки `yes` → `contacts.delete(contact.id)` і `Contact deleted.`.
 5. Будь-яка інша відповідь → `Deletion cancelled.`.
 """
+# Знаходить контакт, просить підтвердження та видаляє його.
 def delete_contact(args, contacts):
-    # Знаходить контакт, просить підтвердження та видаляє його.
     contact = _select_contact(args, contacts)
     if contact is None:
         return "Contact not found."
@@ -190,8 +190,8 @@ def delete_contact(args, contacts):
 - викликати `contacts.get_upcoming_birthdays(days)`;
 - відформатувати name і congratulation_date або `No upcoming birthdays.`.
 """
+# Показує найближчі дні народження на задану кількість днів.
 def birthdays(args, contacts):
-    # Показує найближчі дні народження на задану кількість днів.
     if len(args) != 1:
         return "Usage: birthdays <days>"
 

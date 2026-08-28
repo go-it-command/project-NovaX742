@@ -46,7 +46,7 @@ except ImportError:
 from storage import load_data, save_data
 
 
-# після готовності іншого модуля імпортувати реальні greeting/suggest_command.
+# після готовності іншого модуля - імпортувати реальні greeting/suggest_command.
 # Задача 1 — моделі, валідація й автопідказка
 # (command_suggester.py)
 # Задача 2 — книги й дні народження
