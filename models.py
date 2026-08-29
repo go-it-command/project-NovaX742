@@ -1,7 +1,7 @@
+"""Validated domain models for contacts and standalone notes."""
+
 import re
 from datetime import datetime
-
-"""Validated domain models for contacts and standalone notes."""
 
 
 class Field:

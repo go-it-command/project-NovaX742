@@ -23,6 +23,7 @@ from note_commands import (
 from command_suggester import suggest_command
 from storage import load_data, save_data
 
+
 def parse_input(user_input: str):
     """Return a lower-case command and whitespace-separated arguments.
 
@@ -72,7 +73,8 @@ def greeting():
 
 
 def main():
-    """Run the direct command loop until the user enters ``exit`` or ``close``."""
+    """Run the direct command loop until the
+    user enters ``exit`` or ``close``."""
     contacts, notes = load_data()
     print("Welcome to the assistant bot!")
     print_menu()

@@ -1,3 +1,9 @@
+"""
+Upcoming Birthdays Handler Module.
+Provides functionality to calculate and retrieve a list of contacts with
+birthdays occurring within a specified number of days, adjusting weekend dates
+to the following Monday.
+"""
 from datetime import date, timedelta
 
 

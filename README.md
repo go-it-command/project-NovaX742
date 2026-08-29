@@ -10,7 +10,7 @@
 ### Швидкий запуск у терміналі
 
 ```bash
-cd /Users/PC/Desktop/project-NovaX742
+cd project-NovaX742
 python3 main.py
 ```
 
