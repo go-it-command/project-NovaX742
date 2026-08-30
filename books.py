@@ -2,25 +2,22 @@
 
 from collections import UserDict
 
+from models import Contact, Note
 from upcoming_birthdays import get_upcoming_birthdays
+from utils import normalize_tag
 
 
-def _as_text(value) -> str:
+def _as_text(value: object | None) -> str:
     """Return a plain string for a field object, a raw value or ``None``."""
     if value is None:
         return ""
     return str(getattr(value, "value", value) or "")
 
 
-def _normalize_tag(tag) -> str:
-    """Normalize a tag the same way ``Note`` does: no '#', lower-case, trimmed."""
-    return _as_text(tag).strip().lstrip("#").strip().lower()
-
-
-class AddressBook(UserDict):
+class AddressBook(UserDict[str, Contact]):
     """Store ``Contact`` objects as ``{contact_id: contact}``."""
 
-    def add(self, contact):
+    def add(self, contact: Contact) -> Contact:
         """Store contact under its id.
 
         Ids are unique; names are not — two contacts may both be named
@@ -35,11 +32,11 @@ class AddressBook(UserDict):
         self.data[contact_id] = contact
         return contact
 
-    def find_by_id(self, contact_id: str):
+    def find_by_id(self, contact_id: str) -> Contact | None:
         """Return a Contact by id, or None."""
         return self.data.get(contact_id)
 
-    def search(self, query: str):
+    def search(self, query: str) -> list[Contact]:
         """Return every partial, case-insensitive match across name,
         phone, email, address and birthday."""
         needle = _as_text(query).strip().lower()
@@ -53,7 +50,7 @@ class AddressBook(UserDict):
         ]
 
     @staticmethod
-    def _haystack(contact) -> str:
+    def _haystack(contact: Contact) -> str:
         """Flatten a contact into one lower-case string used for searching."""
         parts = [
             _as_text(contact.id),
@@ -66,7 +63,7 @@ class AddressBook(UserDict):
 
         return " ".join(part for part in parts if part).lower()
 
-    def delete(self, contact_id: str):
+    def delete(self, contact_id: str) -> None:
         """Delete a Contact by id or report it missing. Confirmation is
         performed by the user-facing command before this method is called."""
         if contact_id not in self.data:
@@ -74,20 +71,20 @@ class AddressBook(UserDict):
 
         del self.data[contact_id]
 
-    def get_upcoming_birthdays(self, days: int):
+    def get_upcoming_birthdays(self, days: int) -> list[dict[str, str]]:
         """Validate days and delegate the calculation to the helper."""
         if isinstance(days, bool) or not isinstance(days, int):
             raise ValueError("Number of days must be an integer.")
         if days < 0:
             raise ValueError("Number of days must not be negative.")
 
-        return get_upcoming_birthdays(self, days)
+        return get_upcoming_birthdays(self.values(), days)
 
 
-class NotesBook(UserDict):
+class NotesBook(UserDict[str, Note]):
     """Store standalone ``Note`` objects as ``{note_id: note}``."""
 
-    def add(self, note):
+    def add(self, note: Note) -> Note:
         """Reject a duplicate id and store note."""
         note_id = _as_text(note.id)
         if note_id in self.data:
@@ -96,11 +93,11 @@ class NotesBook(UserDict):
         self.data[note_id] = note
         return note
 
-    def find_by_id(self, note_id: str):
+    def find_by_id(self, note_id: str) -> Note | None:
         """Return a Note by id, or None."""
         return self.data.get(note_id)
 
-    def search(self, query: str):
+    def search(self, query: str) -> list[Note]:
         """Return every note whose text partially matches query."""
         needle = _as_text(query).strip().lower()
         if not needle:
@@ -112,11 +109,9 @@ class NotesBook(UserDict):
             if needle in _as_text(note.text).lower()
         ]
 
-    def search_by_tag(self, tag: str):
+    def search_by_tag(self, tag: str) -> list[Note]:
         """Normalize tag and return every note that contains it."""
-        needle = _normalize_tag(tag)
-        if not needle:
-            return []
+        needle = normalize_tag(tag)
 
         return [
             note
@@ -124,7 +119,7 @@ class NotesBook(UserDict):
             if needle in self._tags(note)
         ]
 
-    def sort_by_tags(self):
+    def sort_by_tags(self) -> list[Note]:
         """Return all notes ordered by tags, with untagged notes last;
         use text or id as a deterministic tie-breaker."""
         def sort_key(note):
@@ -135,15 +130,15 @@ class NotesBook(UserDict):
         return sorted(self.data.values(), key=sort_key)
 
     @staticmethod
-    def _tags(note) -> set:
+    def _tags(note: Note) -> set[str]:
         """Return the normalized, de-duplicated tags of a note."""
         raw = getattr(note, "tags", None) or []
         if isinstance(raw, str):
             raw = [raw]
 
-        return {tag for tag in (_normalize_tag(item) for item in raw) if tag}
+        return {normalize_tag(item) for item in raw}
 
-    def delete(self, note_id: str):
+    def delete(self, note_id: str) -> None:
         """Delete a Note by id or report it missing. Confirmation is
         performed by the user-facing command before this method is called."""
         if note_id not in self.data:

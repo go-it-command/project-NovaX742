@@ -6,6 +6,7 @@ plan/
 опис.md
 tech_критерії.md
 venv/
+.venv/
 .idea/
 .vscode/
 dist/

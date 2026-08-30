@@ -5,13 +5,18 @@ birthdays occurring within a specified number of days, adjusting weekend dates
 to the following Monday.
 """
 from datetime import date, timedelta
+from typing import Iterable
+
+from models import Contact
 
 
-def get_upcoming_birthdays(address_book, days: int):
+def get_upcoming_birthdays(
+    contacts: Iterable[Contact], days: int
+) -> list[dict[str, str]]:
     today = date.today()
     upcoming_birthdays = []
 
-    for contact in address_book.data.values():
+    for contact in contacts:
         if contact.birthday is None:
             continue
 

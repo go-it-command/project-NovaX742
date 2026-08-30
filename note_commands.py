@@ -4,13 +4,13 @@ Provides handler functions for adding, searching, editing, deleting, and
 tagging notes in the CLI assistant application.
 """
 
-from typing import Any, List
 import uuid
 
+from books import NotesBook
 from models import Note
 
 
-def add_note(notes: Any) -> str:
+def add_note(notes: NotesBook) -> str:
     """Creates a note with a unique UUID and text from user input."""
     while True:
         text = input("Note text: ").strip()
@@ -27,7 +27,7 @@ def add_note(notes: Any) -> str:
             print(f"Error: {e}. Please try again.")
 
 
-def find_note(args: List[str], notes: Any) -> str:
+def find_note(args: list[str], notes: NotesBook) -> str:
     """Searches for notes based on a text query."""
     if not args:
         return "Usage: find-note <query>"
@@ -41,7 +41,7 @@ def find_note(args: List[str], notes: Any) -> str:
     return "\n".join(str(note) for note in found_notes)
 
 
-def change_note(args: List[str], notes: Any) -> str:
+def change_note(args: list[str], notes: NotesBook) -> str:
     """Edits the text of an existing note by its UUID."""
     if not args:
         return "Usage: change-note <note_id>"
@@ -67,7 +67,7 @@ def change_note(args: List[str], notes: Any) -> str:
     return f"Note updated: {note}"
 
 
-def delete_note(args: List[str], notes: Any) -> str:
+def delete_note(args: list[str], notes: NotesBook) -> str:
     """Deletes a note by its UUID after user confirmation."""
     if not args:
         return "Usage: delete-note <note_id>"
@@ -91,7 +91,7 @@ def delete_note(args: List[str], notes: Any) -> str:
     return "Deletion cancelled."
 
 
-def add_tag(args: List[str], notes: Any) -> str:
+def add_tag(args: list[str], notes: NotesBook) -> str:
     """Adds a tag to a note (add-tag <note_id> <tag>)."""
     if len(args) != 2:
         return "Usage: add-tag <note_id> <tag>"
@@ -109,7 +109,7 @@ def add_tag(args: List[str], notes: Any) -> str:
         return str(e)
 
 
-def edit_tag(args: List[str], notes: Any) -> str:
+def edit_tag(args: list[str], notes: NotesBook) -> str:
     """Edits a tag on a note (edit-tag <note_id> <old_tag> <new_tag>)."""
     if len(args) != 3:
         return "Usage: edit-tag <note_id> <old_tag> <new_tag>"
@@ -127,7 +127,7 @@ def edit_tag(args: List[str], notes: Any) -> str:
         return str(e)
 
 
-def delete_tag(args: List[str], notes: Any) -> str:
+def delete_tag(args: list[str], notes: NotesBook) -> str:
     """Deletes a tag from a note after confirmation
     (delete-tag <note_id> <tag>)."""
     if len(args) != 2:
@@ -152,7 +152,7 @@ def delete_tag(args: List[str], notes: Any) -> str:
     return "Deletion cancelled."
 
 
-def show_notes_by_tag(args: List[str], notes: Any) -> str:
+def show_notes_by_tag(args: list[str], notes: NotesBook) -> str:
     """Searches for notes by tag (show-notes-by-tag <tag>)."""
     if not args:
         return "Usage: show-notes-by-tag <tag>"
@@ -166,7 +166,7 @@ def show_notes_by_tag(args: List[str], notes: Any) -> str:
     return "\n".join(str(note) for note in found_notes)
 
 
-def sort_notes_by_tags(notes: Any) -> str:
+def sort_notes_by_tags(notes: NotesBook) -> str:
     """Sorts notes by their tags (sort-notes-by-tags)."""
     sorted_notes = notes.sort_by_tags()
 

@@ -7,6 +7,7 @@ COMMANDS = [
     "add-contact",
     "change-contact",
     "find-contact",
+    "show-all-contact",
     "delete-contact",
     "birthdays",
     "add-note",
