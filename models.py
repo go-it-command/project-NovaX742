@@ -2,22 +2,25 @@
 
 import re
 from datetime import datetime
+from typing import Iterable
+
+from utils import normalize_tag
 
 
 class Field:
     """Base value object for validated contact fields."""
 
-    def __init__(self, value):
+    def __init__(self, value: object) -> None:
         self.value = value
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.value)
 
 
 class Name(Field):
     """Required contact name; trim whitespace and reject an empty value."""
 
-    def __init__(self, value: str):
+    def __init__(self, value: str) -> None:
         normalized_value = value.strip()
 
         if not normalized_value:
@@ -31,7 +34,7 @@ class Name(Field):
 class Phone(Field):
     """Normalized and validated phone number."""
 
-    def __init__(self, value: str):
+    def __init__(self, value: str) -> None:
         normalized_value = (
             value.strip()
             .replace(" ", "")
@@ -65,7 +68,7 @@ class Phone(Field):
 class Email(Field):
     """Normalized, lower-case email address."""
 
-    def __init__(self, value: str):
+    def __init__(self, value: str) -> None:
         normalized_value = value.strip().lower()
 
         email_pattern = r"^[^\s@]+@[^\s@]+\.[^\s@]+$"
@@ -82,7 +85,7 @@ class Email(Field):
 class Address(Field):
     """Required non-empty address value."""
 
-    def __init__(self, value: str):
+    def __init__(self, value: str) -> None:
         normalized_value = value.strip()
 
         if not normalized_value:
@@ -94,7 +97,7 @@ class Address(Field):
 class Birthday(Field):
     """Birthday parsed from DD.MM.YYYY and stored as a date."""
 
-    def __init__(self, value: str):
+    def __init__(self, value: str) -> None:
         try:
             birthday_date = datetime.strptime(value.strip(), "%d.%m.%Y").date()
         except (ValueError, AttributeError) as error:
@@ -109,30 +112,30 @@ class Birthday(Field):
 class Contact:
     """One contact, identified by a stable id and independent from notes."""
 
-    def __init__(self, contact_id: str, name: str):
+    def __init__(self, contact_id: str, name: str) -> None:
         self.id = contact_id
         self.name = Name(name)
-        self.phone = None
-        self.email = None
-        self.address = None
-        self.birthday = None
+        self.phone: Phone | None = None
+        self.email: Email | None = None
+        self.address: Address | None = None
+        self.birthday: Birthday | None = None
 
-    def set_phone(self, phone: str):
+    def set_phone(self, phone: str) -> None:
         self.phone = Phone(phone)
 
-    def set_name(self, name: str):
+    def set_name(self, name: str) -> None:
         self.name = Name(name)
 
-    def set_email(self, email: str):
+    def set_email(self, email: str) -> None:
         self.email = Email(email)
 
-    def set_address(self, address: str):
+    def set_address(self, address: str) -> None:
         self.address = Address(address)
 
-    def set_birthday(self, birthday: str):
+    def set_birthday(self, birthday: str) -> None:
         self.birthday = Birthday(birthday)
 
-    def __str__(self):
+    def __str__(self) -> str:
         phone = self.phone.value if self.phone else "—"
         email = self.email.value if self.email else "—"
         address = self.address.value if self.address else "—"
@@ -156,10 +159,15 @@ class Contact:
 class Note:
     """Standalone note identified by a stable id with optional unique tags."""
 
-    def __init__(self, note_id: str, text: str, tags=None):
+    def __init__(
+        self,
+        note_id: str,
+        text: str,
+        tags: Iterable[str] | None = None,
+    ) -> None:
         self.id = note_id
-        self.text = ""
-        self.tags = set()
+        self.text: str = ""
+        self.tags: set[str] = set()
 
         self.edit_text(text)
 
@@ -167,7 +175,7 @@ class Note:
             for tag in tags:
                 self.add_tag(tag)
 
-    def edit_text(self, text: str):
+    def edit_text(self, text: str) -> None:
         normalized_text = text.strip()
 
         if not normalized_text:
@@ -177,13 +185,13 @@ class Note:
 
         self.text = normalized_text
 
-    def add_tag(self, tag: str):
-        normalized_tag = self._normalize_tag(tag)
+    def add_tag(self, tag: str) -> None:
+        normalized_tag = normalize_tag(tag)
         self.tags.add(normalized_tag)
 
-    def edit_tag(self, old_tag: str, new_tag: str):
-        normalized_old_tag = self._normalize_tag(old_tag)
-        normalized_new_tag = self._normalize_tag(new_tag)
+    def edit_tag(self, old_tag: str, new_tag: str) -> None:
+        normalized_old_tag = normalize_tag(old_tag)
+        normalized_new_tag = normalize_tag(new_tag)
 
         if normalized_old_tag not in self.tags:
             raise ValueError(f'Тег "{normalized_old_tag}" не знайдено.')
@@ -191,24 +199,15 @@ class Note:
         self.tags.remove(normalized_old_tag)
         self.tags.add(normalized_new_tag)
 
-    def delete_tag(self, tag: str):
-        normalized_tag = self._normalize_tag(tag)
+    def delete_tag(self, tag: str) -> None:
+        normalized_tag = normalize_tag(tag)
 
         if normalized_tag not in self.tags:
             raise ValueError(f'Тег "{normalized_tag}" не знайдено.')
 
         self.tags.remove(normalized_tag)
 
-    @staticmethod
-    def _normalize_tag(tag: str):
-        normalized_tag = tag.strip().lstrip("#").strip().lower()
-
-        if not normalized_tag:
-            raise ValueError("Тег не може бути порожнім.")
-
-        return normalized_tag
-
-    def __str__(self):
+    def __str__(self) -> str:
         tags = ", ".join(sorted(self.tags)) if self.tags else "—"
 
         return (

@@ -8,6 +8,7 @@ from contact_commands import (
     change_contact,
     delete_contact,
     find_contact,
+    show_all_contacts,
 )
 from note_commands import (
     add_note,
@@ -24,7 +25,7 @@ from command_suggester import suggest_command
 from storage import load_data, save_data
 
 
-def parse_input(user_input: str):
+def parse_input(user_input: str) -> tuple[str | None, list[str]]:
     """Return a lower-case command and whitespace-separated arguments.
 
     Use shlex.split to support quoted values and handle malformed quotes
@@ -42,13 +43,14 @@ def parse_input(user_input: str):
     return command.lower(), args
 
 
-def print_menu():
+def print_menu() -> None:
     """Виводить меню один раз під час запуску."""
     print("""
 Available commands:
     add-contact <name> ...
     change-contact <id or query>
     find-contact <query>
+    show-all-contact
     delete-contact <id or query>
     birthdays <days>
 
@@ -67,12 +69,12 @@ Available commands:
     """)
 
 
-def greeting():
+def greeting() -> str:
     """Return a short greeting shown at application startup."""
     return "How can I help you?"
 
 
-def main():
+def main() -> None:
     """Run the direct command loop until the
     user enters ``exit`` or ``close``."""
     contacts, notes = load_data()
@@ -109,6 +111,8 @@ def main():
                 print(change_contact(args, contacts))
             case "find-contact":
                 print(find_contact(args, contacts))
+            case "show-all-contact":
+                print(show_all_contacts(contacts))
             case "delete-contact":
                 print(delete_contact(args, contacts))
             case "birthdays":
