@@ -5,3 +5,8 @@ assistant_data.pkl
 plan/
 опис.md
 tech_критерії.md
+venv/
+.idea/
+.vscode/
+dist/
+build/

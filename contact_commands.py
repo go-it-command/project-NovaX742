@@ -1,11 +1,12 @@
 """Interactive CLI commands for contact management."""
 
+from typing import Any, Callable, Dict, List, Optional
 import uuid
 
 from models import Contact
 
 
-def _select_contact(args, contacts):
+def _select_contact(args: List[str], contacts: Any) -> Optional[Contact]:
     """Return one contact selected by UUID or a search query."""
     if not args:
         return None
@@ -17,16 +18,16 @@ def _select_contact(args, contacts):
         except ValueError:
             pass
 
-    matches = contacts.search(" ".join(args))
+    matches: List[Contact] = contacts.search(" ".join(args))
     if not matches:
         return None
     if len(matches) == 1:
         return matches[0]
 
-    contact_list = "\n".join(
+    contact_list: str = "\n".join(
         f"{contact.id} — {contact.name.value}" for contact in matches
     )
-    selected_id = input(
+    selected_id: str = input(
         f"Found several contacts:\n{contact_list}\nEnter contact UUID: "
     ).strip()
     return next(
@@ -35,10 +36,10 @@ def _select_contact(args, contacts):
     )
 
 
-def _ask_optional_field(prompt, setter):
+def _ask_optional_field(prompt: str, setter: Callable[[str], None]) -> None:
     """Set an optional field or return when the user skips it."""
     while True:
-        value = input(prompt).strip()
+        value: str = input(prompt).strip()
         if not value:
             return
         try:
@@ -48,7 +49,7 @@ def _ask_optional_field(prompt, setter):
             print(f"Error: {error}")
 
 
-def add_contact(contacts):
+def add_contact(contacts: Any) -> str:
     """Create a contact through an interactive dialogue."""
     while True:
         try:
@@ -68,25 +69,25 @@ def add_contact(contacts):
     return f"Contact added: {contact}"
 
 
-def change_contact(args, contacts):
+def change_contact(args: List[str], contacts: Any) -> str:
     """Change one field of a selected contact."""
-    contact = _select_contact(args, contacts)
+    contact: Optional[Contact] = _select_contact(args, contacts)
     if contact is None:
         return "Contact not found."
 
-    setters = {
+    setters: Dict[str, Callable[[str], None]] = {
         "name": contact.set_name,
         "phone": contact.set_phone,
         "email": contact.set_email,
         "address": contact.set_address,
         "birthday": contact.set_birthday,
     }
-    field = input("Field (name/phone/email/address/birthday): ").strip().lower()
-    setter = setters.get(field)
+    field: str = input("Field (name/phone/email/address/birthday): ").strip().lower()
+    setter: Optional[Callable[[str], None]] = setters.get(field)
     if setter is None:
         return "Invalid field. Choose name, phone, email, address or birthday."
 
-    value = input(f"New {field}: ").strip()
+    value: str = input(f"New {field}: ").strip()
     if not value:
         return "Value cannot be empty."
     try:
@@ -96,25 +97,25 @@ def change_contact(args, contacts):
     return f"Contact updated: {contact}"
 
 
-def find_contact(args, contacts):
+def find_contact(args: List[str], contacts: Any) -> str:
     """Find contacts by a partial query across searchable fields."""
     if not args:
         return "Usage: find-contact <query>"
 
-    matches = contacts.search(" ".join(args))
+    matches: List[Contact] = contacts.search(" ".join(args))
     if not matches:
         return "No contacts found."
     return "\n".join(str(contact) for contact in matches)
 
 
-def delete_contact(args, contacts):
+def delete_contact(args: List[str], contacts: Any) -> str:
     """Delete a selected contact after explicit confirmation."""
-    contact = _select_contact(args, contacts)
+    contact: Optional[Contact] = _select_contact(args, contacts)
     if contact is None:
         return "Contact not found."
 
     print(f"Found contact: {contact}")
-    confirmation = input("Are you sure? (yes/no): ").strip().lower()
+    confirmation: str = input("Are you sure? (yes/no): ").strip().lower()
     if confirmation != "yes":
         return "Deletion cancelled."
 
@@ -122,14 +123,14 @@ def delete_contact(args, contacts):
     return "Contact deleted."
 
 
-def birthdays(args, contacts):
+def birthdays(args: List[str], contacts: Any) -> str:
     """Show contacts with birthdays in the requested number of days."""
     if len(args) != 1:
         return "Usage: birthdays <days>"
 
     try:
-        days = int(args[0])
-        upcoming = contacts.get_upcoming_birthdays(days)
+        days: int = int(args[0])
+        upcoming: List[Dict[str, str]] = contacts.get_upcoming_birthdays(days)
     except ValueError as error:
         return f"Error: {error}"
 
