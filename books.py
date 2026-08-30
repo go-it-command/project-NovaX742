@@ -55,20 +55,14 @@ class AddressBook(UserDict):
     @staticmethod
     def _haystack(contact) -> str:
         """Flatten a contact into one lower-case string used for searching."""
-        parts = [_as_text(contact.id), _as_text(getattr(contact, "name", None))]
-
-        phones = getattr(contact, "phones", None)
-        if phones is None:
-            phones = getattr(contact, "phone", None)
-        if phones is None:
-            phones = []
-        elif isinstance(phones, str) or not hasattr(phones, "__iter__"):
-            phones = [phones]
-        parts.extend(_as_text(phone) for phone in phones)
-
-        parts.append(_as_text(getattr(contact, "email", None)))
-        parts.append(_as_text(getattr(contact, "address", None)))
-        parts.append(_as_text(getattr(contact, "birthday", None)))
+        parts = [
+            _as_text(contact.id),
+            _as_text(contact.name),
+            _as_text(contact.phone),
+            _as_text(contact.email),
+            _as_text(contact.address),
+            _as_text(contact.birthday),
+        ]
 
         return " ".join(part for part in parts if part).lower()
 
